@@ -1,74 +1,57 @@
-import React from "react";
-import Cards from "./Cards";
+import React, { useEffect, useState } from "react";
+import Cards from "./Card";
+import axios from "axios";
+import useScrollPosition from "./useSearchPosition";
 
-const AllStores = ({ className = "" }) => {
-  const stores = [
-    {
-      id: 1,
-      name: "Teamo - Revshare",
-      logo: "https://laraback.enactweb.com/img/teamo-revshare.gif",
-      homepage: "https://teamo.ru",
-      cashback_percent: 80,
-    },
-    {
-      id: 2,
-      name: "Aviasales WW",
-      logo: "https://laraback.enactweb.com/img/aviasales-ww.png",
-      homepage: "http://aviasales.ru",
-      cashback_percent: 80,
-    },
-    {
-      id: 3,
-      name: "Лабиринт",
-      logo: "https://laraback.enactweb.com/img/labirint.png",
-      homepage: "http://labirint.ru",
-      cashback_percent: 80,
-    },
-    {
-      id: 4,
-      name: "City.Travel Many GEOs",
-      logo: "https://laraback.enactweb.com/img/citytravel-many-geos.png",
-      homepage: "https://new.city.travel/avia",
-      cashback_percent: 80,
-    },
-    {
-      id: 5,
-      name: "Lightinthebox WW",
-      logo: "https://laraback.enactweb.com/img/lightinthebox-ww.png",
-      homepage: "https://lightinthebox.com",
-      cashback_percent: 80,
-    },
-    {
-      id: 6,
-      name: "Aliexpress WW",
-      logo: "https://laraback.enactweb.com/img/aliexpress-ww.png",
-      homepage: "https://aliexpress.com",
-      cashback_percent: 80,
-    },
-    {
-      id: 7,
-      name: "Puzzle English",
-      logo: "https://laraback.enactweb.com/img/puzzle-english.svg",
-      homepage: "https://puzzle-english.com",
-      cashback_percent: 80,
-    },
-    {
-      id: 8,
-      name: "Banggood WW",
-      logo: "https://laraback.enactweb.com/img/banggood-ww.png",
-      homepage: "https://www.banggood.com",
-      cashback_percent: 80,
-    },
-  ];
+const AllStores = ({ selectedCategory, searchQuery, sortBy }) => {
+  const [stores, setStores] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const containerRef = useScrollPosition("allStoresScroll", 100);
+
+  const fetchStores = (page, searchQuery, sortBy) => {
+    setLoading(true);
+    let url = `http://localhost:3001/stores?_page=${page}&_limit=20`;
+
+    if (selectedCategory) url += `&cats=${selectedCategory}`;
+    if (searchQuery) url += `&q=${searchQuery}`;
+    if (sortBy) url += `&_sort=${sortBy}`;
+
+    axios
+      .get(url)
+      .then((res) => {
+        setStores((prev) => [...prev, ...res.data]);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false)); 
+  };
+
+  useEffect(() => {
+    fetchStores(page, searchQuery, sortBy);
+  }, [page, selectedCategory, searchQuery, sortBy]);
+
+  const handleScroll = () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+      document.documentElement.offsetHeight - 100
+    ) {
+      if (!loading) {
+        setPage((prev) => prev + 1);
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading]);
 
   return (
-    <div className={`my-[50px] ${className}`}>
-      <hr className="text-brown w-full" />
-      <div className="grid grid-cols-4 gap-2">
-        {stores.map((store) => (
-          <Cards key={store.id} store={store} />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4" ref={containerRef}>
+      {stores.map((store) => (
+        <Cards key={store.id} store={store} />
+      ))}
+      {loading && <p>Loading...</p>}
     </div>
   );
 };

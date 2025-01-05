@@ -1,8 +1,9 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Categories from "./Components/Categories";
 import AllStores from "./Components/AllStores";
+import SortRestorationAndSearch from "./Components/SortAndSearch";
 
 const user = {
   name: "Tom Cook",
@@ -14,7 +15,7 @@ const navigation = [
   { name: "Stores", href: "#", current: true },
 ];
 const userNavigation = [
-  
+
 ];
 
 function classNames(...classes) {
@@ -22,6 +23,18 @@ function classNames(...classes) {
 }
 
 export default function App() {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("name");
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);  // This will update the search query state
+  };
+
+  const handleSort = (sortOption) => {
+    setSortBy(sortOption);  // This will update the sort option state
+  };
+
   return (
     <>
       <div className="min-h-full">
@@ -206,11 +219,34 @@ export default function App() {
             </div>
           </header>
           <main className="p-10">
-            <div className="mx-auto grid grid-cols-3 grid-flow-col max-w-7xl sm:px-6 lg:px-8">
-              <Categories className="bg-white " />
-              <AllStores className=" col-span-2" />
+      <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white sm:col-span-1 p-4 rounded-lg shadow-md">
+            <Categories
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+          </div>
+
+          <div className="flex flex-col sm:col-span-2 space-y-6">
+            <SortRestorationAndSearch
+              onSearch={handleSearch}
+              onSort={handleSort}
+            />
+
+            <div className="bg-white p-4 rounded-lg shadow-md">
+              <AllStores
+                selectedCategory={selectedCategory}
+                searchQuery={searchQuery}
+                sortBy={sortBy}
+              />
             </div>
-          </main>
+          </div>
+        </div>
+      </div>
+    </main>
+
+
         </div>
       </div>
     </>

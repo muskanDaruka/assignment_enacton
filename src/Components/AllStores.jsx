@@ -12,7 +12,6 @@ const AllStores = ({ selectedCategory, searchQuery, sortBy }) => {
   const fetchStores = (page, searchQuery, sortBy) => {
     setLoading(true);
     let url = `http://localhost:3001/stores?_page=${page}&_limit=20`;
-
     if (selectedCategory) url += `&cats=${selectedCategory}`;
     if (searchQuery) url += `&q=${searchQuery}`;
     if (sortBy) url += `&_sort=${sortBy}`;
